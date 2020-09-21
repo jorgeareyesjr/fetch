@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import * as utils from './utilities';
 import './FetchHiring.css';
 
 function FetchHiring() {
   const [ data, setData ] = useState();
-  const [ filteredData, setFilteredData ] = useState();
+  const [ processedData, setProcessedData ] = useState();
   const [ error, setError ] = useState()
   const [ loading, setLoading ] = useState()
 
   // Effect to fetch and set `data`.
   useEffect(() => {
-    let useEffectAborted = false;
-
     async function fetchFallbackData() {
       // Data retrieved by CURL GET request, via command line.
       let fallbackData = require('./FetchHiringData.json');
@@ -18,7 +17,6 @@ function FetchHiring() {
 
       (fallbackData) ? setData(fallbackData) : setError(fallbackError);
     };
-
     async function fetchData() {
       try {
         let url = 'https://fetch-hiring.s3.amazonaws.com/hiring.json';
@@ -45,6 +43,8 @@ function FetchHiring() {
       };
     };
 
+    let useEffectAborted = false;
+
     if(!useEffectAborted) {
       fetchData();
     };
@@ -52,44 +52,40 @@ function FetchHiring() {
     return (() => { useEffectAborted = true; });
   }, [data]);
 
-  // Effect to filter `data`.
+  // Effect to process `data`.
   useEffect(() => {
-    let useEffectAborted = false;
-
-    /**
-     * input: @param {array} data
-     * output: @return {array} - Return filtered data, an array or objects
-     * description: @todo
-    **/
-    async function filterData(data) {
+    async function filterData() {
       /**
        * Display this list of items to the user based on the following requirements:
-       * 
-       * @todo: Display all the items grouped by "listId"
-       * Sort the results first by "listId" then by "name" when displaying.
-       * @todo: Filter out any items where "name" is blank or null.
+       * Display all the items grouped by "listId"
+       * @todo: Sort the results first by "listId" then by "name" when displaying.
+       * Filter out any items where "name" is blank or null.
        * @todo: The final result should be displayed to the user in an easy-to-read list.
-       * 
-       */
-      console.log(data);
+      **/
+      let sortedData = await utils.sortDataByKey(data, 'listId');
+      let filteredData = await utils.filterDataByKey(sortedData, 'name');
+
+      setProcessedData(filteredData)
     };
 
-    if(!useEffectAborted && data) {
-      filterData(data);
+    let useEffectAborted = false;
+
+    if(!useEffectAborted && data && !processedData) {
+      filterData();
     };
 
     return (() => { useEffectAborted = true; });
-  }, [data]);
+  }, [data, processedData]);
 
 
-  if(data) {
+  if(processedData) {
     return (
       <div className="o-fetch-hiring">
         <ul className="c-list">
           {
-            data.map((item, i) => {
+            processedData.map((item, i) => {
               return (
-                <li key={i*i} className="c-list__item">{item.name}</li>
+                <li key={i*i} className="c-list__item">{item.id}, {item.name}</li>
               )
             })
           }

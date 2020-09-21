@@ -30,6 +30,32 @@ async function mapDataGroupsByKey(data, key) {
  
 /**
  * 
+ * @param {array} data - A dataset to be ordered.
+ * @returns {array} - Return a dataset ordered by `name`.
+**/
+function orderDataByName(data) {
+  const cloneArr = [];
+
+  for(let i = 0; i < data.length; i++) {
+    let splitName = data[i].name.split(" ")
+    let nameId = parseInt(splitName[1]);
+
+    cloneArr.push({ order: nameId , ...data[i] });
+  };
+
+  const orderedData = sortDataByKey(cloneArr, 'order');
+
+  for(let i = 0; i < orderedData.length; i++) {
+    delete orderedData[i]['order'];
+    
+    orderedData[i]['processed'] = true;
+  };
+
+  return orderedData;
+};
+
+/**
+ * 
  * @param {array} data - A dataset to sort.
  * @param {string} key - The key used to sort the dataset.
  * @param {string} order - (optional) The order to sort the dataset, `asc` or `desc` - will default to `asc`.
@@ -64,5 +90,6 @@ function sortDataByKey(data, key, order) {
 export {
   filterDataByKey,
   mapDataGroupsByKey,
+  orderDataByName,
   sortDataByKey
 }

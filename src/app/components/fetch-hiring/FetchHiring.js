@@ -3,9 +3,11 @@ import './FetchHiring.css';
 
 function FetchHiring() {
   const [ data, setData ] = useState();
+  const [ filteredData, setFilteredData ] = useState();
   const [ error, setError ] = useState()
   const [ loading, setLoading ] = useState()
 
+  // Effect to fetch and set `data`.
   useEffect(() => {
     let useEffectAborted = false;
 
@@ -49,6 +51,36 @@ function FetchHiring() {
 
     return (() => { useEffectAborted = true; });
   }, [data]);
+
+  // Effect to filter `data`.
+  useEffect(() => {
+    let useEffectAborted = false;
+
+    /**
+     * input: @param {array} data
+     * output: @return {array} - Return filtered data, an array or objects
+     * description: @todo
+    **/
+    async function filterData(data) {
+      /**
+       * Display this list of items to the user based on the following requirements:
+       * 
+       * @todo: Display all the items grouped by "listId"
+       * Sort the results first by "listId" then by "name" when displaying.
+       * @todo: Filter out any items where "name" is blank or null.
+       * @todo: The final result should be displayed to the user in an easy-to-read list.
+       * 
+       */
+      console.log(data);
+    };
+
+    if(!useEffectAborted && data) {
+      filterData(data);
+    };
+
+    return (() => { useEffectAborted = true; });
+  }, [data]);
+
 
   if(data) {
     return (

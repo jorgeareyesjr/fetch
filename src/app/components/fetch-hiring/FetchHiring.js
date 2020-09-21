@@ -5,8 +5,9 @@ import './FetchHiring.css';
 function FetchHiring() {
   const [ data, setData ] = useState();
   const [ processedData, setProcessedData ] = useState();
-  const [ error, setError ] = useState()
-  const [ loading, setLoading ] = useState()
+  const [ error, setError ] = useState();
+  const [ loading, setLoading ] = useState();
+  const [ processing, setProcessing ] = useState();
 
   // Effect to fetch and set `data`.
   useEffect(() => {
@@ -36,7 +37,7 @@ function FetchHiring() {
         // NOTE: Access to fetch at 'https://fetch-hiring.s3.amazonaws.com/hiring.json' from origin 'http://localhost:3000' has been blocked by CORS policy.
         // TODO: Use proxy server to work around CORS policy.
         // Unable to fetch `awsData`, use fallback data instead.
-        setError(error);
+        // setError(error);
         fetchFallbackData();
       } finally {
         setLoading(false);
@@ -62,10 +63,19 @@ function FetchHiring() {
        * Filter out any items where "name" is blank or null.
        * @todo: The final result should be displayed to the user in an easy-to-read list.
       **/
-      let sortedData = await utils.sortDataByKey(data, 'listId');
-      let filteredData = await utils.filterDataByKey(sortedData, 'name');
+      setProcessing(true);
+      
+      try {
+        let sortedData = await utils.sortDataByKey(data, 'listId');
+        let filteredData = await utils.filterDataByKey(sortedData, 'name');
+        let processingError = new Error('Unable to process data.');
 
-      setProcessedData(filteredData)
+        (filteredData) ? setProcessedData(filteredData) : setError(processingError);
+      } catch(error) {
+        setError(error.message)
+      } finally {
+        setProcessing(false);
+      };
     };
 
     let useEffectAborted = false;
@@ -78,7 +88,13 @@ function FetchHiring() {
   }, [data, processedData]);
 
 
-  if(processedData) {
+  if(loading) {
+    return <div className="o-loading">loading...</div>
+  } else if(processing) {
+    return <div className="o-processing">processing...</div>
+  } else if(error) {
+    return <div className="o-error">{error.message}</div>
+  } else if(processedData) {
     return (
       <div className="o-fetch-hiring">
         <ul className="c-list">
@@ -92,10 +108,6 @@ function FetchHiring() {
         </ul>
       </div>
     )
-  } else if(loading) {
-    return <div className="o-loading">loading</div>
-  } else if(error) {
-    return <div className="o-error">{error.message}</div>
   } else {
     return null;
   };

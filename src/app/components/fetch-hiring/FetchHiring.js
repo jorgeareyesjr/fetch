@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import * as utils from './utilities';
-import './FetchHiring.css';
+import DataList from './DataList';
 
 function FetchHiring() {
   const [ data, setData ] = useState();
@@ -61,7 +61,7 @@ function FetchHiring() {
        * Display all the items grouped by "listId"
        * Sort the results first by "listId" then by "name" when displaying.
        * Filter out any items where "name" is blank or null.
-       * @todo: The final result should be displayed to the user in an easy-to-read list.
+       * The final result should be displayed to the user in an easy-to-read list.
       **/
       setProcessing(true);
       
@@ -70,7 +70,6 @@ function FetchHiring() {
         let filteredData = await utils.filterDataByKey(sortedData, 'name');
         let dataGroupsMap = await utils.mapDataGroupsByKey(filteredData, 'listId');
         let dataGroupsArr = await Array.from(dataGroupsMap.values());
-
         let processingError = new Error('Unable to process data.');
 
         (dataGroupsArr) ? setProcessedData(dataGroupsArr) : setError(processingError);
@@ -99,22 +98,7 @@ function FetchHiring() {
     return <div className="o-error">{error.message}</div>
   } else if(processedData) {
     return (
-      <div className="o-fetch-hiring">
-          {
-            processedData.map((dataGroups, i) => {
-              return (
-                <ul key={i*i} className="c-list">
-                  <h1 className="c-list__title">{`'listId' group ${i+1}`}</h1>
-                  {
-                    dataGroups.map((item, j) => {
-                      return <li key={j*j} className="c-list__item">{item.name}</li>
-                    })
-                  }
-                </ul>
-              )
-            })
-          }
-      </div>
+      <DataList data={processedData} />
     )
   } else {
     return null;

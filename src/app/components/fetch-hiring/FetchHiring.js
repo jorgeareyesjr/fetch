@@ -59,7 +59,7 @@ function FetchHiring() {
       /**
        * Display this list of items to the user based on the following requirements:
        * Display all the items grouped by "listId"
-       * @todo: Sort the results first by "listId" then by "name" when displaying.
+       * Sort the results first by "listId" then by "name" when displaying.
        * Filter out any items where "name" is blank or null.
        * @todo: The final result should be displayed to the user in an easy-to-read list.
       **/
@@ -68,9 +68,12 @@ function FetchHiring() {
       try {
         let sortedData = await utils.sortDataByKey(data, 'listId');
         let filteredData = await utils.filterDataByKey(sortedData, 'name');
+        let dataGroupsMap = await utils.mapDataGroupsByKey(filteredData, 'listId');
+        let dataGroupsArr = await Array.from(dataGroupsMap.values());
+
         let processingError = new Error('Unable to process data.');
 
-        (filteredData) ? setProcessedData(filteredData) : setError(processingError);
+        (dataGroupsArr) ? setProcessedData(dataGroupsArr) : setError(processingError);
       } catch(error) {
         setError(error.message)
       } finally {
@@ -97,15 +100,20 @@ function FetchHiring() {
   } else if(processedData) {
     return (
       <div className="o-fetch-hiring">
-        <ul className="c-list">
           {
-            processedData.map((item, i) => {
+            processedData.map((dataGroups, i) => {
               return (
-                <li key={i*i} className="c-list__item">{item.id}, {item.name}</li>
+                <ul key={i*i} className="c-list">
+                  <h1 className="c-list__title">{`'listId' group ${i+1}`}</h1>
+                  {
+                    dataGroups.map((item, j) => {
+                      return <li key={j*j} className="c-list__item">{item.name}</li>
+                    })
+                  }
+                </ul>
               )
             })
           }
-        </ul>
       </div>
     )
   } else {
